@@ -179,6 +179,29 @@ class TestContextMetrics(unittest.TestCase):
         self.assertGreaterEqual(after, before)
 
 
+class TestRerankByOverlap(unittest.TestCase):
+    def test_sorts_by_query_overlap_stably_without_mutating_input(self):
+        contexts = [
+            "Unrelated banana fruit",
+            "Order refund policy",
+            "Refund order timeline",
+            "Order details only",
+        ]
+        original = list(contexts)
+
+        reranked = template.rerank_by_overlap(contexts, "order refund")
+
+        self.assertEqual(
+            reranked,
+            [contexts[1], contexts[2], contexts[3], contexts[0]],
+        )
+        self.assertEqual(contexts, original)
+
+    def test_empty_query_keeps_original_order(self):
+        contexts = ["Second chunk", "First chunk"]
+        self.assertEqual(template.rerank_by_overlap(contexts, ""), contexts)
+
+
 class TestRetrievalMetricWiring(unittest.TestCase):
     """The two retrieval metrics must be connected to the full benchmark."""
 
